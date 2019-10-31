@@ -1,24 +1,65 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Header @sendMsg="getMsg" />
+    <p v-if="books.length === 0" class="loader"></p>
+    <p class="alert alert-warning" v-if="books.length > 0 && filtered.length === 0">No match Found</p>
+    <Book @allBooks="getBooks" :filteredArray="filtered" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from "./components/Header";
+import Book from "./components/Books";
 
 export default {
-  name: 'app',
+  name: "app",
   components: {
-    HelloWorld
+    Header,
+    Book
+  },
+  data() {
+    return {
+      search: "",
+      language: "",
+      filtered: [],
+      books: []
+    };
+  },
+  methods: {
+    getMsg(msg) {
+      this.search = msg[0]; // received search data from header
+      this.language = msg[1];
+      this.filt();
+    },
+    getBooks(book) {
+      this.books = book; // receive the whole book object from "books"
+      this.filt();
+    },
+    filt() {
+      this.filtered = [];
+      for (let criteria in this.books) {
+        if (this.books[criteria].language.includes(this.language)) {
+          if (
+            this.books[criteria].description
+              .toLowerCase()
+              .includes(this.search.toLowerCase()) ||
+            this.books[criteria].title
+              .toLowerCase()
+              .includes(this.search.toLowerCase())
+          ) {
+            this.filtered.push(this.books[criteria]);
+          }
+        }
+      }
+      return this.filtered;
+    }
   }
-}
+};
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
